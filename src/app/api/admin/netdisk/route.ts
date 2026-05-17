@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         Enabled: Boolean(Quark?.Enabled),
         Cookie: normalizedCookie,
         SavePath: Quark?.SavePath || '/',
-        PlayMode: Quark?.PlayMode === 'transcode_first' ? 'transcode_first' : 'direct_first',
+        PlayMode: Quark?.PlayMode === 'direct_first' ? 'direct_first' : 'transcode_first',
       };
       adminConfig.NetDiskConfig.Mobile = {
         Enabled: Boolean(Mobile?.Enabled),

@@ -45,6 +45,8 @@ export async function GET(request: NextRequest) {
         shareId: session.shareId,
         shareToken: session.shareToken,
         fileId: file.fid,
+        fileName: file.name,
+        size: file.size,
         shareFileToken: file.shareFidToken,
         playFolderFid: session.playFolderFid,
       });

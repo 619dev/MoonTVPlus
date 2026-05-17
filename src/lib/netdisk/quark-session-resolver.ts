@@ -34,7 +34,7 @@ export async function resolveQuarkSession(id: string) {
     throw new Error('夸克网盘播放信息恢复失败');
   }
 
-  const playMode: QuarkPlayMode = quarkConfig.PlayMode === 'transcode_first' ? 'transcode_first' : 'direct_first';
+  const playMode: QuarkPlayMode = quarkConfig.PlayMode === 'direct_first' ? 'direct_first' : 'transcode_first';
 
   return {
     session,

@@ -298,6 +298,27 @@ async function findDirectoryByName(
   ) || null;
 }
 
+async function findDriveFileInFolder(
+  cookie: string,
+  parentFid: string,
+  input: { fileName?: string; size?: number }
+): Promise<any | null> {
+  const fileName = input.fileName?.trim();
+  if (!fileName) return null;
+
+  const items = await fetchAllDriveFolderItems(cookie, parentFid);
+  return items.find((item: any) => {
+    const isDir = Boolean(item.dir || item.is_dir || item.file_type === 0);
+    if (isDir) return false;
+    const itemName = String(item.file_name || item.name || '');
+    if (itemName !== fileName) return false;
+    if (input.size && Number(item.size || 0) > 0) {
+      return Number(item.size || 0) === input.size;
+    }
+    return true;
+  }) || null;
+}
+
 export async function validateQuarkCookieReadable(cookie: string): Promise<void> {
   const safeCookie = assertQuarkCookieHeaderSafe(cookie);
   await fetchDriveFolderItems(safeCookie, '0');
@@ -626,11 +647,22 @@ export async function saveQuarkShareFile(
     shareId: string;
     shareToken: string;
     fileId: string;
+    fileName?: string;
+    size?: number;
     shareFileToken?: string;
     playFolderFid: string;
   }
 ): Promise<string> {
   const safeCookie = assertQuarkCookieHeaderSafe(cookie);
+
+  const existedFile = await findDriveFileInFolder(safeCookie, input.playFolderFid, {
+    fileName: input.fileName,
+    size: input.size,
+  });
+  if (existedFile) {
+    return String(existedFile.fid || existedFile.file_id);
+  }
+
   const taskId = await submitSaveTask(
     safeCookie,
     { pwdId: input.shareId, passcode: '' },
@@ -639,8 +671,9 @@ export async function saveQuarkShareFile(
     [
       {
         fid: input.fileId,
-        fileName: '',
+        fileName: input.fileName || '',
         dir: false,
+        size: input.size,
         shareFidToken: input.shareFileToken,
       },
     ]
@@ -668,6 +701,14 @@ export async function saveQuarkShareFile(
       return String(saveAsTopFids[0]);
     }
 
+    const savedFile = await findDriveFileInFolder(safeCookie, input.playFolderFid, {
+      fileName: input.fileName,
+      size: input.size,
+    });
+    if (savedFile) {
+      return String(savedFile.fid || savedFile.file_id);
+    }
+
     const status = data?.data?.status;
     if (status === -1 || status === 'failed' || data?.data?.err_code) {
       throw new Error(data?.data?.message || data?.data?.err_msg || '夸克任务执行失败');
@@ -686,7 +727,7 @@ export async function saveQuarkShareFile(
 export async function getQuarkPlayUrls(
   cookie: string,
   savedFileId: string,
-  playMode: QuarkPlayMode = 'direct_first'
+  playMode: QuarkPlayMode = 'transcode_first'
 ): Promise<Array<{ name: string; url: string; priority: number }>> {
   const safeCookie = assertQuarkCookieHeaderSafe(cookie);
   const headers = getHeaders(safeCookie);

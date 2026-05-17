@@ -3936,7 +3936,7 @@ const NetDiskConfigComponent = ({
   const [enabled, setEnabled] = useState(false);
   const [cookie, setCookie] = useState('');
   const [savePath, setSavePath] = useState('/');
-  const [quarkPlayMode, setQuarkPlayMode] = useState<'direct_first' | 'transcode_first'>('direct_first');
+  const [quarkPlayMode, setQuarkPlayMode] = useState<'direct_first' | 'transcode_first'>('transcode_first');
   const [mobileEnabled, setMobileEnabled] = useState(false);
   const [mobileAuthorization, setMobileAuthorization] = useState('');
   const [baiduEnabled, setBaiduEnabled] = useState(false);
@@ -3960,7 +3960,7 @@ const NetDiskConfigComponent = ({
     setEnabled(quark?.Enabled || false);
     setCookie(quark?.Cookie || '');
     setSavePath(quark?.SavePath || '/');
-    setQuarkPlayMode(quark?.PlayMode === 'transcode_first' ? 'transcode_first' : 'direct_first');
+    setQuarkPlayMode(quark?.PlayMode === 'direct_first' ? 'direct_first' : 'transcode_first');
     setMobileEnabled(mobile?.Enabled || false);
     setMobileAuthorization(mobile?.Authorization || '');
     setBaiduEnabled(config?.NetDiskConfig?.Baidu?.Enabled || false);
